@@ -19,7 +19,7 @@ public/
 themes/   # 主题文件夹
 ```
 <!-- more-->
-其实 blog 文件夹中自带`.gitignore`，我只是在最后添加了一行`themes/`，因为该目录的文件数太多，同时也没必要备份，比如我用的是 NexT 主题，后续恢复时再重新从 [NexT](https://github.com/iissnan/hexo-theme-next) 仓库 clone 一份就可以了。当然默认设置下我们的主题配置文件是在`themes/`目录下的，这个问题下文会提到解决方法。
+其实 blog 文件夹中自带`.gitignore`，我只是在最后添加了一行`themes/`，因为该目录的文件数太多，同时也没必要备份，比如我用的是 NexT 主题，后续恢复时再重新从 [NexT](https://github.com/theme-next/hexo-theme-next) 仓库 clone 一份就可以了。当然默认设置下我们的主题配置文件是在`themes/`目录下的，这个问题下文会提到解决方法。
 
 #### 迁移主题配置文件
 在 source 文件夹下新建`_data`目录，复制`themes/next`目录下的主题配置文件`_config.yml`到`_data`目录，重命名为`next.yml`，编辑`next.yml`文件，作如下修改：
@@ -30,7 +30,8 @@ override: true   # 覆盖 NexT 的主题配置文件
     1. 此操作在平时就可以完成，这样就避免了每次拉取新的 NexT 版本都要重新修改`_config.yml`。
     2. 不需要备份整个`themes`目录。
 
-#### 在 blog 文件夹下执行以下命令
+#### 上传到 GitHub 仓库
+在 blog 文件夹下执行以下命令
 ```bash
 git init  # 初始化 git 仓库
 git checkout -b hexo  # 新建一个 hexo 分支用于备份
@@ -50,6 +51,12 @@ git clone -b hexo git@github.com:xfffrank/xfffrank.github.io.git
 2. 安装 hexo
 ```bash
 npm install -g hexo-cli 
+
+npm install
+```
+3. 安装 NexT 主题
+```bash
+git clone https://github.com/theme-next/hexo-theme-next themes/next
 ```
 
 #### 参考资料

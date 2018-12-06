@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="如需转载，请注明作者。  完整代码请移步GitHub。 获取ip并验证有效性 从西刺首页获取了类型为 HTTP 和 HTTPS 的ip，数量不多，此处主要是说明步骤。 获取 ip 后将有效 ip 存入 txt 文件。 该部分的代码参考了此博文。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="scrapy建立ip代理池教程">
+<meta property="og:url" content="http://yoursite.com/2018/07/10/scrapy建立ip代理池教程/index.html">
+<meta property="og:site_name" content="起风了">
+<meta property="og:description" content="如需转载，请注明作者。  完整代码请移步GitHub。 获取ip并验证有效性 从西刺首页获取了类型为 HTTP 和 HTTPS 的ip，数量不多，此处主要是说明步骤。 获取 ip 后将有效 ip 存入 txt 文件。 该部分的代码参考了此博文。">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2018-10-19T13:04:28.713Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="scrapy建立ip代理池教程">
+<meta name="twitter:description" content="如需转载，请注明作者。  完整代码请移步GitHub。 获取ip并验证有效性 从西刺首页获取了类型为 HTTP 和 HTTPS 的ip，数量不多，此处主要是说明步骤。 获取 ip 后将有效 ip 存入 txt 文件。 该部分的代码参考了此博文。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/07/10/scrapy建立ip代理池教程/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>scrapy建立ip代理池教程 | 起风了</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">起风了</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/10/scrapy建立ip代理池教程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Feng Xie">
+      <meta itemprop="description" content="勤劳耕作。">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="起风了">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">scrapy建立ip代理池教程
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-07-10 17:41:22" itemprop="dateCreated datePublished" datetime="2018-07-10T17:41:22+01:00">2018-07-10</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-10-19 14:04:28" itemprop="dateModified" datetime="2018-10-19T14:04:28+01:00">2018-10-19</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术笔记/" itemprop="url" rel="index"><span itemprop="name">技术笔记</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2018/07/10/scrapy建立ip代理池教程/#SOHUCS" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">Comments: </span> <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/07/10/scrapy建立ip代理池教程/" itemprop="commentsCount"></span>
+                </a>
+              
+            
+          
+
+          
+          
+             <span id="/2018/07/10/scrapy建立ip代理池教程/" class="leancloud_visitors" data-flag-title="scrapy建立ip代理池教程">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>如需转载，请注明作者。</p>
+</blockquote>
+<p>完整代码请移步<a href="https://github.com/xfffrank/Scrapy/tree/master/meishijie" target="_blank" rel="noopener">GitHub</a>。</p>
+<h3 id="获取ip并验证有效性"><a href="#获取ip并验证有效性" class="headerlink" title="获取ip并验证有效性"></a>获取ip并验证有效性</h3><ul>
+<li>从<a href="http://www.xicidaili.com/" target="_blank" rel="noopener">西刺</a>首页获取了类型为 HTTP 和 HTTPS 的ip，数量不多，此处主要是说明步骤。</li>
+<li>获取 ip 后将有效 ip 存入 txt 文件。</li>
+<li>该部分的代码参考了<a href="https://blog.csdn.net/u011781521/article/details/70194744" target="_blank" rel="noopener">此博文</a>。<a id="more"></a></li>
+</ul>
+<ol>
+<li><p>分析网页，获取ip</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_proxy_ip</span><span class="params">(self)</span>:</span></span><br><span class="line">    start = time.time()  </span><br><span class="line">    print(<span class="string">'start crawling ip...'</span>)</span><br><span class="line">    html = requests.get(<span class="string">'http://www.xicidaili.com/'</span>, headers=&#123;</span><br><span class="line">        <span class="string">'User-Agent'</span>: <span class="string">'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.79 Safari/537.36'</span></span><br><span class="line">    &#125;)</span><br><span class="line">    soup = BeautifulSoup(html.text, <span class="string">'lxml'</span>)</span><br><span class="line">    trs = soup.find(<span class="string">'table'</span>, id=<span class="string">'ip_list'</span>).find_all(<span class="string">'tr'</span>, class_=[<span class="string">''</span>, <span class="string">'odd'</span>])[<span class="number">2</span>:]</span><br><span class="line">    <span class="keyword">for</span> tr <span class="keyword">in</span> trs:</span><br><span class="line">        scheme = tr.findAll(<span class="string">'td'</span>, class_=<span class="string">""</span>)[<span class="number">-3</span>].get_text().lower()</span><br><span class="line">        <span class="keyword">if</span> scheme <span class="keyword">in</span> [<span class="string">'http'</span>, <span class="string">'https'</span>]:</span><br><span class="line">            ip = tr.findAll(<span class="string">'td'</span>, class_=<span class="string">""</span>)[<span class="number">0</span>].get_text()</span><br><span class="line">            port = tr.findAll(<span class="string">'td'</span>, class_=<span class="string">""</span>)[<span class="number">1</span>].get_text()</span><br><span class="line">            ip_info = scheme + <span class="string">'://'</span> + ip + <span class="string">':'</span> + port</span><br><span class="line">            self.proxy_list.append(ip_info)</span><br><span class="line">    <span class="comment"># print(self.proxy_list)</span></span><br><span class="line">    print(<span class="string">'total time: %.2f'</span> % (time.time() - start))  <span class="comment"># 记录函数运行时间</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>对 ip 逐个验证<br>利用<code>requests</code>库对过滤掉没有用的 ip，主要是检查响应状态码。<code>old_queue</code>用于进程间通信，第三步会说明。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">verify_one_ip</span><span class="params">(self, old_queue, new_queue)</span>:</span></span><br><span class="line">    <span class="keyword">while</span> <span class="number">1</span>:</span><br><span class="line">        proxy = old_queue.get()</span><br><span class="line">        <span class="keyword">if</span> proxy == <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        protocol = <span class="string">'https'</span> <span class="keyword">if</span> <span class="string">'https'</span> <span class="keyword">in</span> proxy <span class="keyword">else</span> <span class="string">'http'</span></span><br><span class="line">        proxies = &#123;</span><br><span class="line">            protocol: proxy</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">if</span> requests.get(<span class="string">'https://www.baidu.com'</span>, timeout=<span class="number">2</span>, proxies=proxies).status_code == <span class="number">200</span>:</span><br><span class="line">                print(<span class="string">'[success] %s'</span> % proxy)</span><br><span class="line">                new_queue.put(proxy)</span><br><span class="line">        <span class="keyword">except</span>:</span><br><span class="line">            print(<span class="string">'[fail] %s'</span> % proxy)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用多进程对 ip 进行验证<br><code>old_queue</code>保存未验证的 ip 队列，<code>new_queue</code>保存验证成功的 ip 队列。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">verify_proxies</span><span class="params">(self)</span>:</span></span><br><span class="line">    start = time.time()</span><br><span class="line">    old_queue = Queue()</span><br><span class="line">    new_queue = Queue()</span><br><span class="line">    print(<span class="string">'verify proxies...'</span>)</span><br><span class="line">    workers = []</span><br><span class="line">    <span class="keyword">for</span> _ <span class="keyword">in</span> range(<span class="number">15</span>):  <span class="comment"># 开启 15 个进程</span></span><br><span class="line">        workers.append(Process(target=self.verify_one_ip, args=(old_queue, new_queue)))</span><br><span class="line">    <span class="keyword">for</span> w <span class="keyword">in</span> workers:</span><br><span class="line">        w.start()</span><br><span class="line">    <span class="keyword">for</span> ip <span class="keyword">in</span> self.proxy_list:</span><br><span class="line">        old_queue.put(ip)</span><br><span class="line">    <span class="keyword">for</span> w <span class="keyword">in</span> workers:</span><br><span class="line">        old_queue.put(<span class="number">0</span>)  <span class="comment"># 为每个进程设置一个结束点，详见 verify_one_ip 的设计。</span></span><br><span class="line">    <span class="keyword">for</span> w <span class="keyword">in</span> workers:</span><br><span class="line">        w.join()</span><br><span class="line">    self.proxy_list = []</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>):</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            self.proxy_list.append(new_queue.get(timeout=<span class="number">1</span>))</span><br><span class="line">        <span class="keyword">except</span>:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    print(<span class="string">'[verification] total time: %.2f s'</span> % (time.time() - start))  <span class="comment"># 记录验证时间</span></span><br><span class="line">    print(<span class="string">'proxies verified !'</span>)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>将有效 ip 保存到 txt 文件</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> open(<span class="string">'proxies.txt'</span>, <span class="string">'w'</span>) <span class="keyword">as</span> f:</span><br><span class="line">    <span class="keyword">for</span> proxy <span class="keyword">in</span> g.proxy_list:</span><br><span class="line">        f.write(proxy + <span class="string">'\n'</span>)</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h3 id="scrapy-设置"><a href="#scrapy-设置" class="headerlink" title="scrapy 设置"></a>scrapy 设置</h3><p>打开项目的<code>middlewares.py</code>文件，在<code>your_project_DownloaderMiddleware</code>类中新增一个<code>get_random_ip</code>和<code>__init__</code>方法，并重写<code>process_request</code>和<code>process_exception</code>方法。</p>
+<ol>
+<li><p>从已建立的 ip 池中随机抽取一个 ip 用于代理</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_random_ip</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="keyword">with</span> open(<span class="string">'proxies.txt'</span>, <span class="string">'r'</span>) <span class="keyword">as</span> f:</span><br><span class="line">        proxies = f.readlines()  <span class="comment"># readlines 方法将一次性读取文件的所有行，返回一个列表</span></span><br><span class="line">    proxy = random.choice(proxies).strip()  <span class="comment"># 从返回的列表中随机选取一个 ip</span></span><br><span class="line">    <span class="keyword">return</span> proxy</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>增加一个初始化方法，设置 scrapy 的默认代理ip</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">    self.proxy = self.get_random_ip()</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>重写<code>process_request</code>和<code>process_response</code>方法。</p>
+</li>
+</ol>
+<ul>
+<li>说明：当响应状态码不为 200，即连接不成功时，更换 ip，否则使用默认 ip，这样可以有效利用代理 ip。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">process_request</span><span class="params">(self, request, spider)</span>:</span></span><br><span class="line">    <span class="comment"># Called for each request that goes through the downloader</span></span><br><span class="line">    <span class="comment"># middleware.</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># Must either:</span></span><br><span class="line">    <span class="comment"># - return None: continue processing this request</span></span><br><span class="line">    <span class="comment"># - or return a Response object</span></span><br><span class="line">    <span class="comment"># - or return a Request object</span></span><br><span class="line">    <span class="comment"># - or raise IgnoreRequest: process_exception() methods of</span></span><br><span class="line">    <span class="comment">#   installed downloader middleware will be called</span></span><br><span class="line">    <span class="comment"># print('当前代理为 ', self.proxy)</span></span><br><span class="line">    <span class="string">'''</span></span><br><span class="line"><span class="string">    每次发请求的时候将代理修改为自定义 ip</span></span><br><span class="line"><span class="string">    '''</span></span><br><span class="line">    request.meta[<span class="string">'proxy'</span>] = self.proxy</span><br><span class="line">    <span class="comment"># return None</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">process_exception</span><span class="params">(self, request, exception, spider)</span>:</span></span><br><span class="line">    <span class="comment"># Called when a download handler or a process_request()</span></span><br><span class="line">    <span class="comment"># (from other downloader middleware) raises an exception.</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># Must either:</span></span><br><span class="line">    <span class="comment"># - return None: continue processing this exception</span></span><br><span class="line">    <span class="comment"># - return a Response object: stops process_exception() chain</span></span><br><span class="line">    <span class="comment"># - return a Request object: stops process_exception() chain</span></span><br><span class="line">    <span class="string">'''</span></span><br><span class="line"><span class="string">    我在设置中将请求的超时时间设为 3 秒（见第四步），</span></span><br><span class="line"><span class="string">    这个函数的作用是当超时异常发生时，更换代理 ip</span></span><br><span class="line"><span class="string">    '''</span></span><br><span class="line">    self.proxy = self.get_random_ip()</span><br><span class="line">    spider.logger.info(<span class="string">'---更换 ip---'</span>)</span><br><span class="line">    print(<span class="string">'更换 ip 为：'</span>, self.proxy)</span><br><span class="line">    request.meta[<span class="string">'proxy'</span>] = self.proxy</span><br><span class="line">    <span class="keyword">return</span> request</span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>在项目<code>settings.py</code>中作相关设置</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">DOWNLOADER_MIDDLEWARES = &#123;</span><br><span class="line">   <span class="string">'your_project.middlewares.your_project_DownloaderMiddleware'</span>: <span class="number">400</span>,</span><br><span class="line">&#125;</span><br><span class="line">DOWNLOAD_TIMEOUT = <span class="number">3</span>  <span class="comment"># 设置连接超时时间</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/09/有道、腾讯、谷歌、百度四大翻译api聚合接口/" rel="next" title="有道、腾讯、谷歌、百度四大翻译api聚合接口[python实现]">
+                <i class="fa fa-chevron-left"></i> 有道、腾讯、谷歌、百度四大翻译api聚合接口[python实现]
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/07/18/Docker入门指南/" rel="prev" title="Docker入门指南">
+                Docker入门指南 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="SOHUCS"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Feng Xie</p>
+              <p class="site-description motion-element" itemprop="description">勤劳耕作。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">18</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/xfffrank" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:xfffrank@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#获取ip并验证有效性"><span class="nav-number">1.</span> <span class="nav-text">获取ip并验证有效性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#scrapy-设置"><span class="nav-number">2.</span> <span class="nav-text">scrapy 设置</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Feng Xie</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+    <script type="text/javascript">
+    (function(){
+      var appid = 'cytHIoob7';
+      var conf = 'a74878b84b94915c87bb686fd6be8f14';
+      var width = window.innerWidth || document.documentElement.clientWidth;
+      if (width < 960) {
+      window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){
+        window.changyan.api.config({appid:appid,conf:conf})});
+      }
+    })();
+    </script>
+    <script type="text/javascript" src="https://assets.changyan.sohu.com/upload/plugins/plugins.count.js"></script>
+  
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function ({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
+            
+            .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.time + 1);
+            })
+            
+            .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+            })
+          } else {
+            
+              Counter('post', '/classes/Counter', JSON.stringify({ title: title, url: url, time: 1}))
+                .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(1);
+                })
+                .fail(function () {
+                  console.log('Failed to create');
+                });
+            
+          }
+        })
+      .fail(function ({ responseJSON }) {
+        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
+      });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "ruLfoH235IR9xk3Ga2kAoHkA-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "ruLfoH235IR9xk3Ga2kAoHkA-gzGzoHsz",
+                'X-LC-Key': "8e640BVPOwa2pIIF7crMbxWr",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          addCount(Counter);
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

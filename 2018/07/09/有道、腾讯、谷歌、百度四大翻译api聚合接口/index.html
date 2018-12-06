@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="如需转载，请注明作者。  api分析 谷歌使用的是一个非官方的api，优点是免费且调用非常方便，缺点是不稳定，需要翻墙才能正常使用，且后续可能会被屏蔽。 有道、百度   在有道智云和百度翻译开发平台申请一下账号即可试用服务，大规模使用 api 则需要付费。 获得账号以后在各自的接口文档里根据步骤编写代码调用 api 即可，将这两个 api 写在一起是因为两者的调用参数非常相似，签名的生成方法也基">
+<meta property="og:type" content="article">
+<meta property="og:title" content="有道、腾讯、谷歌、百度四大翻译api聚合接口[python实现]">
+<meta property="og:url" content="http://yoursite.com/2018/07/09/有道、腾讯、谷歌、百度四大翻译api聚合接口/index.html">
+<meta property="og:site_name" content="起风了">
+<meta property="og:description" content="如需转载，请注明作者。  api分析 谷歌使用的是一个非官方的api，优点是免费且调用非常方便，缺点是不稳定，需要翻墙才能正常使用，且后续可能会被屏蔽。 有道、百度   在有道智云和百度翻译开发平台申请一下账号即可试用服务，大规模使用 api 则需要付费。 获得账号以后在各自的接口文档里根据步骤编写代码调用 api 即可，将这两个 api 写在一起是因为两者的调用参数非常相似，签名的生成方法也基">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2018-10-19T13:04:28.714Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="有道、腾讯、谷歌、百度四大翻译api聚合接口[python实现]">
+<meta name="twitter:description" content="如需转载，请注明作者。  api分析 谷歌使用的是一个非官方的api，优点是免费且调用非常方便，缺点是不稳定，需要翻墙才能正常使用，且后续可能会被屏蔽。 有道、百度   在有道智云和百度翻译开发平台申请一下账号即可试用服务，大规模使用 api 则需要付费。 获得账号以后在各自的接口文档里根据步骤编写代码调用 api 即可，将这两个 api 写在一起是因为两者的调用参数非常相似，签名的生成方法也基">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/07/09/有道、腾讯、谷歌、百度四大翻译api聚合接口/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>有道、腾讯、谷歌、百度四大翻译api聚合接口[python实现] | 起风了</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">起风了</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/09/有道、腾讯、谷歌、百度四大翻译api聚合接口/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Feng Xie">
+      <meta itemprop="description" content="勤劳耕作。">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="起风了">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">有道、腾讯、谷歌、百度四大翻译api聚合接口[python实现]
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-07-09 17:26:30" itemprop="dateCreated datePublished" datetime="2018-07-09T17:26:30+01:00">2018-07-09</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-10-19 14:04:28" itemprop="dateModified" datetime="2018-10-19T14:04:28+01:00">2018-10-19</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术笔记/" itemprop="url" rel="index"><span itemprop="name">技术笔记</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2018/07/09/有道、腾讯、谷歌、百度四大翻译api聚合接口/#SOHUCS" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">Comments: </span> <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/07/09/有道、腾讯、谷歌、百度四大翻译api聚合接口/" itemprop="commentsCount"></span>
+                </a>
+              
+            
+          
+
+          
+          
+             <span id="/2018/07/09/有道、腾讯、谷歌、百度四大翻译api聚合接口/" class="leancloud_visitors" data-flag-title="有道、腾讯、谷歌、百度四大翻译api聚合接口[python实现]">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>如需转载，请注明作者。</p>
+</blockquote>
+<h3 id="api分析"><a href="#api分析" class="headerlink" title="api分析"></a>api分析</h3><ol>
+<li>谷歌<br>使用的是一个<a href="https://github.com/ssut/py-googletrans" target="_blank" rel="noopener">非官方的api</a>，优点是免费且调用非常方便，缺点是不稳定，需要翻墙才能正常使用，且后续可能会被屏蔽。</li>
+<li>有道、百度</li>
+</ol>
+<ul>
+<li>在<a href="http://ai.youdao.com/" target="_blank" rel="noopener">有道智云</a>和<a href="http://api.fanyi.baidu.com/api/trans/product/index" target="_blank" rel="noopener">百度翻译开发平台</a>申请一下账号即可试用服务，大规模使用 api 则需要付费。</li>
+<li>获得账号以后在各自的接口文档里根据步骤编写代码调用 api 即可，将这两个 api 写在一起是因为两者的调用参数非常相似，签名的生成方法也基本相同。</li>
+</ul>
+<ol start="3">
+<li>腾讯</li>
+</ol>
+<ul>
+<li>同样是在<a href="https://cloud.tencent.com/document/product/551/15611" target="_blank" rel="noopener">腾讯云</a>注册账号以后即可调用接口，暂时是免费的，但有请求限制。</li>
+<li>腾讯的接口调用比较严格，主要是签名的生成过程比较繁琐，很容易出现错误且难以检测，我用python折腾了几天都不知道错在哪里，最后发现是调用<code>requests</code>库的<code>get</code>方法时，<code>params</code>参数修改了签名的编码导致了错误。</li>
+</ul>
+<a id="more"></a>
+<h3 id="关键代码"><a href="#关键代码" class="headerlink" title="关键代码"></a>关键代码</h3><p><em>完整代码请移步 <a href="https://gist.github.com/xfffrank/bcce9cc038f2569769b7f4e1cfd3a65a" target="_blank" rel="noopener">Github</a></em></p>
+<ol>
+<li><p>谷歌</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">google_trans</span><span class="params">(self, query_text)</span>:</span></span><br><span class="line">    lang_to = <span class="string">'zh-CN'</span> <span class="keyword">if</span> self.lang_to == <span class="string">'zh'</span> <span class="keyword">else</span> self.lang_to <span class="comment"># 谷歌api对中文的缩写是zh-CN，在统一调用时需单独处理</span></span><br><span class="line">    google_trans = Translator()</span><br><span class="line">    result = google_trans.translate(query_text, dest=lang_to).text</span><br><span class="line">    <span class="comment"># print('---google---')</span></span><br><span class="line">    <span class="comment"># print(result)</span></span><br><span class="line">    <span class="keyword">return</span> result</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>有道</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">youdao_get_url_encoded_params</span><span class="params">(self, query_text)</span>:</span></span><br><span class="line">    <span class="string">"""按api调用要求拼接url</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        query_text: 待翻译的文本</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        符合调用接口要求的参数dict</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    app_key = <span class="string">'你的app_key'</span></span><br><span class="line">    app_secret = <span class="string">'你的app_secret'</span></span><br><span class="line">    salt = str(round(time.time() * <span class="number">1000</span>))</span><br><span class="line">    sign_raw = app_key + query_text + salt + app_secret</span><br><span class="line">    sign = hashlib.md5(sign_raw.encode(<span class="string">'utf8'</span>)).hexdigest()</span><br><span class="line">    params = &#123;</span><br><span class="line">        <span class="string">'q'</span>: query_text,</span><br><span class="line">        <span class="string">'from'</span>: self.lang_from,</span><br><span class="line">        <span class="string">'to'</span>: self.lang_to,</span><br><span class="line">        <span class="string">'appKey'</span>: app_key,</span><br><span class="line">        <span class="string">'salt'</span>: salt,</span><br><span class="line">        <span class="string">'sign'</span>: sign</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> params</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">youdao_parse</span><span class="params">(self, query_text)</span>:</span></span><br><span class="line">    <span class="string">"""解析有道api返回的 json 数据</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        query_text: 待翻译的字符串文本</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        翻译好的文本</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    base_url = <span class="string">'https://openapi.youdao.com/api'</span></span><br><span class="line">    params = self.youdao_get_url_encoded_params(query_text)</span><br><span class="line">    response = requests.get(base_url, headers=self.headers, params=params).text</span><br><span class="line">    json_data = json.loads(response)</span><br><span class="line">    trans_text = json_data[<span class="string">'translation'</span>][<span class="number">0</span>]</span><br><span class="line">    <span class="comment"># print('---youdao---')</span></span><br><span class="line">    <span class="comment"># print(trans_text)</span></span><br><span class="line">    <span class="keyword">return</span> trans_text</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>百度</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">baidu_get_url_encoded_params</span><span class="params">(self, query_text)</span>:</span></span><br><span class="line">    <span class="string">"""按api调用要求拼接url</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        query_text: 待翻译的文本</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        符合调用接口要求的参数dict</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    app_id = <span class="string">'你的app_id'</span></span><br><span class="line">    app_secret = <span class="string">'你的app_secret'</span></span><br><span class="line">    salt = str(round(time.time() * <span class="number">1000</span>))</span><br><span class="line">    sign_raw = app_id + query_text + salt + app_secret</span><br><span class="line">    sign = hashlib.md5(sign_raw.encode(<span class="string">'utf8'</span>)).hexdigest()</span><br><span class="line">    params = &#123;</span><br><span class="line">        <span class="string">'q'</span>: query_text,</span><br><span class="line">        <span class="string">'from'</span>: self.lang_from,</span><br><span class="line">        <span class="string">'to'</span>: self.lang_to,</span><br><span class="line">        <span class="string">'appid'</span>: app_id,</span><br><span class="line">        <span class="string">'salt'</span>: salt,</span><br><span class="line">        <span class="string">'sign'</span>: sign</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> params</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">baidu_parse</span><span class="params">(self, query_text)</span>:</span></span><br><span class="line">    <span class="string">"""解析有道api返回的 json 数据</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        query_text: 待翻译的字符串文本</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        翻译好的文本</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    base_url = <span class="string">'https://fanyi-api.baidu.com/api/trans/vip/translate'</span></span><br><span class="line">    params = self.baidu_get_url_encoded_params(query_text)</span><br><span class="line">    response = requests.get(base_url, headers=self.headers, params=params).text</span><br><span class="line">    json_data = json.loads(response)</span><br><span class="line">    res = [i[<span class="string">'dst'</span>] <span class="keyword">for</span> i <span class="keyword">in</span> json_data[<span class="string">'trans_result'</span>]]</span><br><span class="line">    trans_text = <span class="string">'\n\n'</span>.join(res)</span><br><span class="line">    <span class="comment"># print('---baidu---')</span></span><br><span class="line">    <span class="comment"># print(trans_text)</span></span><br><span class="line">    <span class="keyword">return</span> trans_text</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>腾讯</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">tencent_get_url_encoded_params</span><span class="params">(self, query_text)</span>:</span></span><br><span class="line">    action = <span class="string">'TextTranslate'</span></span><br><span class="line">    region = <span class="string">'ap-guangzhou'</span></span><br><span class="line">    timestamp = int(time.time())</span><br><span class="line">    nonce = random.randint(<span class="number">1</span>, <span class="number">1e6</span>)</span><br><span class="line">    secret_id = <span class="string">'你的secret_id'</span></span><br><span class="line">    secret_key = <span class="string">'你的secret_key'</span>  <span class="comment"># my secret_key</span></span><br><span class="line">    version = <span class="string">'2018-03-21'</span></span><br><span class="line">    lang_from = self.lang_from</span><br><span class="line">    lang_to = self.lang_to</span><br><span class="line"></span><br><span class="line">    params_dict = &#123;</span><br><span class="line">        <span class="comment"># 公共参数</span></span><br><span class="line">        <span class="string">'Action'</span>: action,</span><br><span class="line">        <span class="string">'Region'</span>: region,</span><br><span class="line">        <span class="string">'Timestamp'</span>: timestamp,</span><br><span class="line">        <span class="string">'Nonce'</span>: nonce,</span><br><span class="line">        <span class="string">'SecretId'</span>: secret_id,</span><br><span class="line">        <span class="string">'Version'</span>: version,</span><br><span class="line">        <span class="comment"># 接口参数</span></span><br><span class="line">        <span class="string">'ProjectId'</span>: <span class="number">0</span>,</span><br><span class="line">        <span class="string">'Source'</span>: lang_from,</span><br><span class="line">        <span class="string">'Target'</span>: lang_to,</span><br><span class="line">        <span class="string">'SourceText'</span>: query_text</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment"># 对参数排序，并拼接请求字符串</span></span><br><span class="line">    params_str = <span class="string">''</span></span><br><span class="line">    <span class="keyword">for</span> key <span class="keyword">in</span> sorted(params_dict.keys()):</span><br><span class="line">        pair = <span class="string">'='</span>.join([key, str(params_dict[key])])</span><br><span class="line">        params_str += pair + <span class="string">'&amp;'</span></span><br><span class="line">    params_str = params_str[:<span class="number">-1</span>]</span><br><span class="line">    <span class="comment"># 拼接签名原文字符串</span></span><br><span class="line">    signature_raw = <span class="string">'GETtmt.tencentcloudapi.com/?'</span> + params_str</span><br><span class="line">    <span class="comment"># 生成签名串，并进行url编码</span></span><br><span class="line">    hmac_code = hmac.new(bytes(secret_key, <span class="string">'utf8'</span>), signature_raw.encode(<span class="string">'utf8'</span>), hashlib.sha1).digest()</span><br><span class="line">    sign = quote(base64.b64encode(hmac_code))</span><br><span class="line">    <span class="comment"># 添加签名请求参数</span></span><br><span class="line">    params_dict[<span class="string">'Signature'</span>] = sign</span><br><span class="line">    <span class="comment"># 将 dict 转换为 list 并拼接为字符串</span></span><br><span class="line">    temp_list = []</span><br><span class="line">    <span class="keyword">for</span> k, v <span class="keyword">in</span> params_dict.items():</span><br><span class="line">        temp_list.append(str(k) + <span class="string">'='</span> + str(v))</span><br><span class="line">    params_data = <span class="string">'&amp;'</span>.join(temp_list)</span><br><span class="line">    <span class="keyword">return</span> params_data</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">tencent_parse</span><span class="params">(self, query_text)</span>:</span></span><br><span class="line">    url_with_args = <span class="string">'https://tmt.tencentcloudapi.com/?'</span> + self.tencent_get_url_encoded_params(query_text)</span><br><span class="line">    res = requests.get(url_with_args, headers=self.headers)</span><br><span class="line">    json_res = json.loads(res.text)</span><br><span class="line">    trans_text = json_res[<span class="string">'Response'</span>][<span class="string">'TargetText'</span>]</span><br><span class="line">    <span class="keyword">return</span> trans_text</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/09/python读写csv或tsv文件的几种方法/" rel="next" title="python读写csv或tsv文件的几种方法">
+                <i class="fa fa-chevron-left"></i> python读写csv或tsv文件的几种方法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/07/10/scrapy建立ip代理池教程/" rel="prev" title="scrapy建立ip代理池教程">
+                scrapy建立ip代理池教程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="SOHUCS"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Feng Xie</p>
+              <p class="site-description motion-element" itemprop="description">勤劳耕作。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">18</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/xfffrank" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:xfffrank@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#api分析"><span class="nav-number">1.</span> <span class="nav-text">api分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关键代码"><span class="nav-number">2.</span> <span class="nav-text">关键代码</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Feng Xie</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+    <script type="text/javascript">
+    (function(){
+      var appid = 'cytHIoob7';
+      var conf = 'a74878b84b94915c87bb686fd6be8f14';
+      var width = window.innerWidth || document.documentElement.clientWidth;
+      if (width < 960) {
+      window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){
+        window.changyan.api.config({appid:appid,conf:conf})});
+      }
+    })();
+    </script>
+    <script type="text/javascript" src="https://assets.changyan.sohu.com/upload/plugins/plugins.count.js"></script>
+  
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function ({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
+            
+            .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.time + 1);
+            })
+            
+            .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+            })
+          } else {
+            
+              Counter('post', '/classes/Counter', JSON.stringify({ title: title, url: url, time: 1}))
+                .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(1);
+                })
+                .fail(function () {
+                  console.log('Failed to create');
+                });
+            
+          }
+        })
+      .fail(function ({ responseJSON }) {
+        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
+      });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "ruLfoH235IR9xk3Ga2kAoHkA-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "ruLfoH235IR9xk3Ga2kAoHkA-gzGzoHsz",
+                'X-LC-Key': "8e640BVPOwa2pIIF7crMbxWr",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          addCount(Counter);
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

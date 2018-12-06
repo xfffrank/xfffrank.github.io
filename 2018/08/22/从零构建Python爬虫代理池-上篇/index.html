@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="我将通过两篇文章，介绍一下如何构建一个简单可用的代理池，以及如何定制一个 get 函数来发送网页请求。对于小规模爬虫来说，这样的工具就足够了。这里说的小规模对应的场景是数据量在十万以下，且爬虫程序不需要一直运行或定时执行的。 我比较懒，就直接讲代码啦。我会把代码结构和全部代码都放出来，也会尽量把注释写详细，把结构写得简洁易懂。这样就省得再放一个 GitHub 链接了。虽然我可能还是会放一下，意思意">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零构建Python爬虫代理池--上篇">
+<meta property="og:url" content="http://yoursite.com/2018/08/22/从零构建Python爬虫代理池-上篇/index.html">
+<meta property="og:site_name" content="起风了">
+<meta property="og:description" content="我将通过两篇文章，介绍一下如何构建一个简单可用的代理池，以及如何定制一个 get 函数来发送网页请求。对于小规模爬虫来说，这样的工具就足够了。这里说的小规模对应的场景是数据量在十万以下，且爬虫程序不需要一直运行或定时执行的。 我比较懒，就直接讲代码啦。我会把代码结构和全部代码都放出来，也会尽量把注释写详细，把结构写得简洁易懂。这样就省得再放一个 GitHub 链接了。虽然我可能还是会放一下，意思意">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2018-10-19T13:04:28.713Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="从零构建Python爬虫代理池--上篇">
+<meta name="twitter:description" content="我将通过两篇文章，介绍一下如何构建一个简单可用的代理池，以及如何定制一个 get 函数来发送网页请求。对于小规模爬虫来说，这样的工具就足够了。这里说的小规模对应的场景是数据量在十万以下，且爬虫程序不需要一直运行或定时执行的。 我比较懒，就直接讲代码啦。我会把代码结构和全部代码都放出来，也会尽量把注释写详细，把结构写得简洁易懂。这样就省得再放一个 GitHub 链接了。虽然我可能还是会放一下，意思意">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/08/22/从零构建Python爬虫代理池-上篇/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>从零构建Python爬虫代理池--上篇 | 起风了</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">起风了</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/08/22/从零构建Python爬虫代理池-上篇/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Feng Xie">
+      <meta itemprop="description" content="勤劳耕作。">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="起风了">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">从零构建Python爬虫代理池--上篇
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-08-22 10:33:42" itemprop="dateCreated datePublished" datetime="2018-08-22T10:33:42+01:00">2018-08-22</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-10-19 14:04:28" itemprop="dateModified" datetime="2018-10-19T14:04:28+01:00">2018-10-19</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术笔记/" itemprop="url" rel="index"><span itemprop="name">技术笔记</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2018/08/22/从零构建Python爬虫代理池-上篇/#SOHUCS" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">Comments: </span> <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/08/22/从零构建Python爬虫代理池-上篇/" itemprop="commentsCount"></span>
+                </a>
+              
+            
+          
+
+          
+          
+             <span id="/2018/08/22/从零构建Python爬虫代理池-上篇/" class="leancloud_visitors" data-flag-title="从零构建Python爬虫代理池--上篇">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>我将通过两篇文章，介绍一下如何构建一个简单可用的代理池，以及如何定制一个 get 函数来发送网页请求。对于小规模爬虫来说，这样的工具就足够了。这里说的小规模对应的场景是数据量在十万以下，且爬虫程序不需要一直运行或定时执行的。</p>
+<p>我比较懒，就直接讲代码啦。我会把代码结构和全部代码都放出来，也会尽量把注释写详细，把结构写得简洁易懂。这样就省得再放一个 GitHub 链接了。虽然我可能还是会放一下，意思意思哈哈。<br><a id="more"></a></p>
+<h3 id="代码结构"><a href="#代码结构" class="headerlink" title="代码结构"></a>代码结构</h3><p>我是从<a href="http://www.xicidaili.com/" target="_blank" rel="noopener">西刺首页</a>获取代理的，其实也可以只获取一些<a href="http://www.xicidaili.com/nn" target="_blank" rel="noopener">高匿的代理</a>。改一下html解析部分的代码就好了。</p>
+<p>话不多说，上代码。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 用于发送 HTTP 请求的库</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="comment"># 用于解析 HTML 并提取信息</span></span><br><span class="line"><span class="keyword">from</span> bs4 <span class="keyword">import</span> BeautifulSoup</span><br><span class="line"><span class="comment"># time 这个库主要用来记录一下时间</span></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="comment"># 在验证 ip 有效性的时候我会开多线程</span></span><br><span class="line"><span class="keyword">from</span> threading <span class="keyword">import</span> Thread</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">队列用于线程间通信。需要注意的是，得从 queue 导入 Queue。</span></span><br><span class="line"><span class="string">不能从 multiprocessing 导入 Queue，这是用于进程间通信的。</span></span><br><span class="line"><span class="string">虽然两者用法基本一致，但底层实现不同。</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="keyword">from</span> queue <span class="keyword">import</span> Queue</span><br></pre></td></tr></table></figure>
+<p>然后是把获取、验证代理ip并持久化到文件的操作封装成一个类。先摆出类的结构，让各位有个整体的认识，再讲每一个方法。（哈哈其实是因为如果我单独讲每个函数的话整体性比较差，也不利于你们复制粘贴进行测试。）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">GetIp</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, verify_site)</span>:</span></span><br><span class="line">        <span class="string">'''</span></span><br><span class="line"><span class="string">        类初始化。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :param str verify_site: 用于对代理ip进行测试的网站，可以填入要爬的网站链接。</span></span><br><span class="line"><span class="string">        '''</span></span><br><span class="line">        <span class="comment"># proxy_list 保存从西刺爬下来的代理</span></span><br><span class="line">        self.proxy_list = []</span><br><span class="line">        <span class="comment"># success_list 保存验证通过的代理</span></span><br><span class="line">        self.success_list = []</span><br><span class="line">        self.site = verify_site</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_proxies</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">'''</span></span><br><span class="line"><span class="string">        从西刺首页获取 http 和 https 代理地址并存入实例变量 proxy_list。</span></span><br><span class="line"><span class="string">        '''</span></span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">'''</span></span><br><span class="line"><span class="string">        负责获取代理，开启多线程任务对代理地址进行验证。</span></span><br><span class="line"><span class="string">        '''</span></span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">verify_proxies</span><span class="params">(self, proxy_q)</span>:</span></span><br><span class="line">        <span class="string">'''</span></span><br><span class="line"><span class="string">        顾名思义，验证代理的有效性。</span></span><br><span class="line"><span class="string">        '''</span></span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+<h3 id="获取代理"><a href="#获取代理" class="headerlink" title="获取代理"></a>获取代理</h3><p>整体思路是先对西刺首页的 HTML 进行解析，找到 http 和 https 类型的代理，再把类型(http/https)、ip地址、端口号拼接在一起。用 time 模块记录一下运行时间。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_proxies</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="comment"># 记录开始时间</span></span><br><span class="line">    start = time.time()</span><br><span class="line">    print(<span class="string">'start crawling ip...'</span>)</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># 发送http请求，加一个 User-Agent 的请求头让服务器觉得我们不像爬虫脚本，</span></span><br><span class="line">        <span class="comment"># 不加 headers 也可以。</span></span><br><span class="line">        html = requests.get(<span class="string">'http://www.xicidaili.com/'</span>, headers=&#123;</span><br><span class="line">            <span class="string">'User-Agent'</span>: <span class="string">'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.79 Safari/537.36'</span></span><br><span class="line">        &#125;)</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="comment"># 若请求失败则抛出异常，中断程序，因为获取不到网页内容，继续下去也没意义了。</span></span><br><span class="line">        <span class="keyword">raise</span></span><br><span class="line">    <span class="comment"># 以下的解析部分的注释省去，各位看一下 BeautifulSoup 的文档就知道了，不是本文的重点。</span></span><br><span class="line">    soup = BeautifulSoup(html.text, <span class="string">'lxml'</span>)</span><br><span class="line">    trs = soup.find(<span class="string">'table'</span>, id=<span class="string">'ip_list'</span>).find_all(<span class="string">'tr'</span>, class_=[<span class="string">''</span>, <span class="string">'odd'</span>])[<span class="number">2</span>:]</span><br><span class="line">    <span class="keyword">for</span> tr <span class="keyword">in</span> trs:</span><br><span class="line">        scheme = tr.findAll(<span class="string">'td'</span>, class_=<span class="string">""</span>)[<span class="number">-3</span>].get_text().lower()</span><br><span class="line">        <span class="keyword">if</span> scheme <span class="keyword">in</span> [<span class="string">'http'</span>, <span class="string">'https'</span>]:</span><br><span class="line">            ip = tr.findAll(<span class="string">'td'</span>, class_=<span class="string">""</span>)[<span class="number">0</span>].get_text()</span><br><span class="line">            port = tr.findAll(<span class="string">'td'</span>, class_=<span class="string">""</span>)[<span class="number">1</span>].get_text()</span><br><span class="line">            proxy = scheme + <span class="string">'://'</span> + ip + <span class="string">':'</span> + port</span><br><span class="line">            self.proxy_list.append(proxy)</span><br><span class="line">    <span class="comment"># 打印运行时间</span></span><br><span class="line">    print(<span class="string">'[Get Proxies]total time: %.2f'</span> % (time.time() - start))</span><br></pre></td></tr></table></figure>
+<h3 id="开启多线程任务"><a href="#开启多线程任务" class="headerlink" title="开启多线程任务"></a>开启多线程任务</h3><p>思路：开 15 个线程用于验证 ip 有效性，并用队列实现线程间的通信。这里使用多线程的原因是：虽然 Python 中存在 GIL 全局解释器锁，不能完成真正的并行任务，但是在等待时间较长的 IO 操作（网络IO，磁盘IO）时 GIL 会被释放，允许其他线程执行。在完成爬虫任务时，多线程的执行效率会比多进程更高。</p>
+<p>撸代码啦。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="comment"># 先执行获取代理的函数，将爬下来的代理暂时保存至实例变量 proxy_list</span></span><br><span class="line">    self.get_proxies()</span><br><span class="line">    start = time.time()</span><br><span class="line">    <span class="comment"># 实例化一个队列对象</span></span><br><span class="line">    proxy_q = Queue()</span><br><span class="line">    print(<span class="string">'Verifying proxies...'</span>)</span><br><span class="line">    <span class="comment"># workers 列表保存线程</span></span><br><span class="line">    workers = []</span><br><span class="line">    <span class="comment"># 把爬下来的代理地址逐个放进队列</span></span><br><span class="line">    <span class="keyword">for</span> p <span class="keyword">in</span> self.proxy_list:</span><br><span class="line">        proxy_q.put(p)</span><br><span class="line">    <span class="comment"># 开启15个线程并放入workers</span></span><br><span class="line">    <span class="comment"># 最后往队列放入数量与线程一样的数字0，作为每个线程结束的标记</span></span><br><span class="line">    <span class="keyword">for</span> _ <span class="keyword">in</span> range(<span class="number">15</span>):</span><br><span class="line">        workers.append(Thread(target=self.verify_proxies, args=(proxy_q,)))</span><br><span class="line">        proxy_q.put(<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">for</span> w <span class="keyword">in</span> workers:</span><br><span class="line">        <span class="comment"># 启动线程</span></span><br><span class="line">        w.start()</span><br><span class="line">    <span class="keyword">for</span> w <span class="keyword">in</span> workers:</span><br><span class="line">        <span class="comment"># 等待线程终止</span></span><br><span class="line">        w.join()</span><br><span class="line">    print(<span class="string">'[verification] total time: %.2f s'</span> % (time.time() - start))</span><br><span class="line">    print(<span class="string">'proxies verified !'</span>)</span><br></pre></td></tr></table></figure></p>
+<h3 id="验证代理有效性"><a href="#验证代理有效性" class="headerlink" title="验证代理有效性"></a>验证代理有效性</h3><p>思路：对爬下来的代理逐个进行验证，检查返回的状态码是否为200，即请求是否成功。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">verify_proxies</span><span class="params">(self, proxy_q)</span>:</span></span><br><span class="line">    <span class="string">'''</span></span><br><span class="line"><span class="string">    :param list proxy_q: 待验证的代理队列</span></span><br><span class="line"><span class="string">    '''</span></span><br><span class="line">    <span class="comment"># 写一个死循环不断从传入队列中获取代理地址</span></span><br><span class="line">    <span class="keyword">while</span> <span class="number">1</span>:</span><br><span class="line">        proxy = proxy_q.get()</span><br><span class="line">        <span class="comment"># 若获取到的值是 0，即退出循环，线程终止</span></span><br><span class="line">        <span class="keyword">if</span> proxy == <span class="number">0</span>:  <span class="keyword">break</span></span><br><span class="line">        protocol = <span class="string">'https'</span> <span class="keyword">if</span> <span class="string">'https'</span> <span class="keyword">in</span> proxy <span class="keyword">else</span> <span class="string">'http'</span></span><br><span class="line">        proxies = &#123;</span><br><span class="line">            protocol: proxy</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="comment"># 若返回状态码不等于200、或在HTTP连接过程中发生其他错误，则抛出异常</span></span><br><span class="line">            <span class="comment"># 设置连接超时时间为3秒</span></span><br><span class="line">            <span class="comment"># self.site为初始化时设置的测试链接</span></span><br><span class="line">            <span class="keyword">assert</span> requests.get(self.site, timeout=<span class="number">3</span>, proxies=proxies).status_code == <span class="number">200</span></span><br><span class="line">        <span class="keyword">except</span>:</span><br><span class="line">            print(<span class="string">'[fail] %s'</span> % proxy)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            print(<span class="string">'[success] %s'</span> % proxy)</span><br><span class="line">            <span class="comment"># 保存验证通过的代理</span></span><br><span class="line">            self.success_list.append(proxy)</span><br></pre></td></tr></table></figure>
+<h3 id="测试代码"><a href="#测试代码" class="headerlink" title="测试代码"></a>测试代码</h3><p>这个类就写完了，来测试一下代码吧。<br>随便用一个测试网站，把验证通过的代理存入 txt 文件。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    print(<span class="string">'Test Site: &#123;&#125;'</span>.format(<span class="string">'http://www.hiyd.com/dongzuo/'</span>))</span><br><span class="line">    g = GetIp(<span class="string">'http://www.hiyd.com/dongzuo/'</span>)</span><br><span class="line">    g.run()</span><br><span class="line">    <span class="keyword">with</span> open(<span class="string">'proxies.txt'</span>, <span class="string">'w'</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> proxy <span class="keyword">in</span> g.success_list:</span><br><span class="line">            f.write(proxy + <span class="string">'\n'</span>)</span><br></pre></td></tr></table></figure></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>本文主要讲了如何构建一个Python爬虫代理池，并详细解释了代码，代码应该还算简洁易懂吧。</p>
+<p>如果只想知道如何建立代理池，看到这里就差不多了，下一篇我主要讲如何定制一个url请求函数，除了使用代理ip之外，加入随机 User-Agent 等等，增强爬虫程序的隐蔽性和健壮性。</p>
+<p>本人水平有限，如有纰漏，请不吝告知。</p>
+<blockquote>
+<p>转载请联系作者</p>
+</blockquote>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/21/运用抓包爬取动态加载网站-案例二/" rel="next" title="运用抓包爬取动态加载网站--案例二">
+                <i class="fa fa-chevron-left"></i> 运用抓包爬取动态加载网站--案例二
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/22/从零构建Python爬虫代理池-下篇/" rel="prev" title="从零构建Python爬虫代理池--下篇">
+                从零构建Python爬虫代理池--下篇 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="SOHUCS"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Feng Xie</p>
+              <p class="site-description motion-element" itemprop="description">勤劳耕作。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">18</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/xfffrank" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:xfffrank@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#代码结构"><span class="nav-number">1.</span> <span class="nav-text">代码结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取代理"><span class="nav-number">2.</span> <span class="nav-text">获取代理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#开启多线程任务"><span class="nav-number">3.</span> <span class="nav-text">开启多线程任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#验证代理有效性"><span class="nav-number">4.</span> <span class="nav-text">验证代理有效性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试代码"><span class="nav-number">5.</span> <span class="nav-text">测试代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Feng Xie</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+    <script type="text/javascript">
+    (function(){
+      var appid = 'cytHIoob7';
+      var conf = 'a74878b84b94915c87bb686fd6be8f14';
+      var width = window.innerWidth || document.documentElement.clientWidth;
+      if (width < 960) {
+      window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){
+        window.changyan.api.config({appid:appid,conf:conf})});
+      }
+    })();
+    </script>
+    <script type="text/javascript" src="https://assets.changyan.sohu.com/upload/plugins/plugins.count.js"></script>
+  
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function ({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
+            
+            .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.time + 1);
+            })
+            
+            .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+            })
+          } else {
+            
+              Counter('post', '/classes/Counter', JSON.stringify({ title: title, url: url, time: 1}))
+                .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(1);
+                })
+                .fail(function () {
+                  console.log('Failed to create');
+                });
+            
+          }
+        })
+      .fail(function ({ responseJSON }) {
+        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
+      });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "ruLfoH235IR9xk3Ga2kAoHkA-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "ruLfoH235IR9xk3Ga2kAoHkA-gzGzoHsz",
+                'X-LC-Key': "8e640BVPOwa2pIIF7crMbxWr",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          addCount(Counter);
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

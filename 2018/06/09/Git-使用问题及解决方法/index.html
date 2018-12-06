@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="如何创建文件夹  在网页上点击新建文件，在命名框中添加/就变成文件夹 远程仓库 添加$git remote add [name] [url] 删除$git remote rm [name]  分支 删除远程分支$git push origin --delete &amp;lt;remoteBranchName&amp;gt; 推送本地分支，若远程不存在该分支会自动创建$git push &amp;lt;remoteRep">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Git 使用问题及解决方法">
+<meta property="og:url" content="http://yoursite.com/2018/06/09/Git-使用问题及解决方法/index.html">
+<meta property="og:site_name" content="起风了">
+<meta property="og:description" content="如何创建文件夹  在网页上点击新建文件，在命名框中添加/就变成文件夹 远程仓库 添加$git remote add [name] [url] 删除$git remote rm [name]  分支 删除远程分支$git push origin --delete &amp;lt;remoteBranchName&amp;gt; 推送本地分支，若远程不存在该分支会自动创建$git push &amp;lt;remoteRep">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2018-10-19T13:04:28.712Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Git 使用问题及解决方法">
+<meta name="twitter:description" content="如何创建文件夹  在网页上点击新建文件，在命名框中添加/就变成文件夹 远程仓库 添加$git remote add [name] [url] 删除$git remote rm [name]  分支 删除远程分支$git push origin --delete &amp;lt;remoteBranchName&amp;gt; 推送本地分支，若远程不存在该分支会自动创建$git push &amp;lt;remoteRep">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/06/09/Git-使用问题及解决方法/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Git 使用问题及解决方法 | 起风了</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">起风了</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/06/09/Git-使用问题及解决方法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Feng Xie">
+      <meta itemprop="description" content="勤劳耕作。">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="起风了">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Git 使用问题及解决方法
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-06-09 12:56:26" itemprop="dateCreated datePublished" datetime="2018-06-09T12:56:26+01:00">2018-06-09</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-10-19 14:04:28" itemprop="dateModified" datetime="2018-10-19T14:04:28+01:00">2018-10-19</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术笔记/" itemprop="url" rel="index"><span itemprop="name">技术笔记</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2018/06/09/Git-使用问题及解决方法/#SOHUCS" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">Comments: </span> <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/06/09/Git-使用问题及解决方法/" itemprop="commentsCount"></span>
+                </a>
+              
+            
+          
+
+          
+          
+             <span id="/2018/06/09/Git-使用问题及解决方法/" class="leancloud_visitors" data-flag-title="Git 使用问题及解决方法">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="如何创建文件夹"><a href="#如何创建文件夹" class="headerlink" title="如何创建文件夹"></a>如何创建文件夹</h3><p>  在网页上点击新建文件，在命名框中添加<code>/</code>就变成文件夹</p>
+<h3 id="远程仓库"><a href="#远程仓库" class="headerlink" title="远程仓库"></a>远程仓库</h3><ul>
+<li>添加<br><code>$git remote add [name] [url]</code></li>
+<li>删除<br><code>$git remote rm [name]</code></li>
+</ul>
+<h3 id="分支"><a href="#分支" class="headerlink" title="分支"></a>分支</h3><ul>
+<li>删除远程分支<br><code>$git push origin --delete &lt;remoteBranchName&gt;</code></li>
+<li>推送本地分支，若远程不存在该分支会自动创建<br><code>$git push &lt;remoteRepository&gt; &lt;localBranchName&gt;</code>  </li>
+<li>合并其他分支到当前分支<br><code>$git merge &lt;branchName&gt;(要合并的分支)</code></li>
+<li>强制删除本地分支<br><code>git branch -D &lt;localBranchName&gt;</code></li>
+</ul>
+<h3 id="在-Github-上添加公钥"><a href="#在-Github-上添加公钥" class="headerlink" title="在 Github 上添加公钥"></a>在 Github 上添加公钥</h3><p>1.<code>$ ssh -T git@github.com</code>检查权限<br>  <code>Permission denied (publickey).</code>  </p>
+<p>2.生成 ssh 密钥<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">$ ssh-keygen -t rsa -C &quot;xfffrank&quot;</span><br><span class="line">Generating public/private rsa key pair.</span><br><span class="line">Enter file in which to save the key (/home/FrankXie/.ssh/id_rsa): </span><br><span class="line">Enter passphrase (empty for no passphrase): </span><br><span class="line">Enter same passphrase again: </span><br><span class="line">Your identification has been saved in /home/FrankXie/.ssh/id_rsa.</span><br><span class="line">Your public key（使用这个文件） has been saved in /home/FrankXie/.ssh/id_rsa.pub.</span><br><span class="line">The key fingerprint is:</span><br><span class="line">SHA256:ae01V2/IEOMh12ZXKSaL33Ro1cBmvHMcq0fuoQ12o+0 xfffrank</span><br><span class="line">The key&apos;s randomart image is:</span><br><span class="line">+---[RSA 2048]----+</span><br><span class="line">|          . =+..=|</span><br><span class="line">|           = *O+o|</span><br><span class="line">|          . *=+++|</span><br><span class="line">|         + . *o*+|</span><br><span class="line">|        S o * Ooo|</span><br><span class="line">|       . . o B B |</span><br><span class="line">|          . . X o|</span><br><span class="line">|             o + |</span><br><span class="line">|              .E |</span><br><span class="line">+----[SHA256]-----+</span><br></pre></td></tr></table></figure></p>
+<p>3.复制公钥  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ cat /home/FrankXie/.ssh/id_rsa.pub</span><br><span class="line">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCohUb8EJqFuzaNJbCL8ck044lgvjsJr8PgCNerp(省略。。。)+kX5e5Go920A1+wcgGJewKqurPHHgjYCfo9YCFbm1rP4Ne4cmpvmaL91v xfffrank</span><br></pre></td></tr></table></figure>
+<p>4.在 Github settings 上添加该公钥   </p>
+<p>5.测试权限  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">Hi xfffrank! You&apos;ve successfully authenticated, but GitHub does not provide shell access.</span><br></pre></td></tr></table></figure>
+<h3 id="本地分支与远程分支冲突的解决办法"><a href="#本地分支与远程分支冲突的解决办法" class="headerlink" title="本地分支与远程分支冲突的解决办法"></a>本地分支与远程分支冲突的解决办法</h3><ul>
+<li>若本地仓库是远程仓库的子集，即本地包含的文件远程都有，可以先将本地分支推送到远程仓库，再通过 pull request 与 master 分支合并。</li>
+</ul>
+<h3 id="解决-gitignore-文件失效"><a href="#解决-gitignore-文件失效" class="headerlink" title="解决 .gitignore 文件失效"></a>解决 .gitignore 文件失效</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git rm -r --cached . #从 git 中删除所有文件记录</span><br><span class="line">git add . ＃重新加入文件</span><br><span class="line">git commit -m &quot;fixed untracked files&quot;</span><br></pre></td></tr></table></figure>
+<h3 id="版本回退"><a href="#版本回退" class="headerlink" title="版本回退"></a>版本回退</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git reset --hard [commit_id]</span><br></pre></td></tr></table></figure>
+<p>注：通过<code>git log</code>命令查看每个 commit 版本的id；<code>commit_id</code>不需要写全</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/09/MySQL使用备忘录/" rel="prev" title="MySQL使用备忘录">
+                MySQL使用备忘录 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="SOHUCS"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Feng Xie</p>
+              <p class="site-description motion-element" itemprop="description">勤劳耕作。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">18</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/xfffrank" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:xfffrank@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#如何创建文件夹"><span class="nav-number">1.</span> <span class="nav-text">如何创建文件夹</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#远程仓库"><span class="nav-number">2.</span> <span class="nav-text">远程仓库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分支"><span class="nav-number">3.</span> <span class="nav-text">分支</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在-Github-上添加公钥"><span class="nav-number">4.</span> <span class="nav-text">在 Github 上添加公钥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#本地分支与远程分支冲突的解决办法"><span class="nav-number">5.</span> <span class="nav-text">本地分支与远程分支冲突的解决办法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决-gitignore-文件失效"><span class="nav-number">6.</span> <span class="nav-text">解决 .gitignore 文件失效</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#版本回退"><span class="nav-number">7.</span> <span class="nav-text">版本回退</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Feng Xie</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+    <script type="text/javascript">
+    (function(){
+      var appid = 'cytHIoob7';
+      var conf = 'a74878b84b94915c87bb686fd6be8f14';
+      var width = window.innerWidth || document.documentElement.clientWidth;
+      if (width < 960) {
+      window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){
+        window.changyan.api.config({appid:appid,conf:conf})});
+      }
+    })();
+    </script>
+    <script type="text/javascript" src="https://assets.changyan.sohu.com/upload/plugins/plugins.count.js"></script>
+  
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function ({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
+            
+            .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.time + 1);
+            })
+            
+            .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+            })
+          } else {
+            
+              Counter('post', '/classes/Counter', JSON.stringify({ title: title, url: url, time: 1}))
+                .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(1);
+                })
+                .fail(function () {
+                  console.log('Failed to create');
+                });
+            
+          }
+        })
+      .fail(function ({ responseJSON }) {
+        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
+      });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "ruLfoH235IR9xk3Ga2kAoHkA-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "ruLfoH235IR9xk3Ga2kAoHkA-gzGzoHsz",
+                'X-LC-Key': "8e640BVPOwa2pIIF7crMbxWr",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          addCount(Counter);
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
